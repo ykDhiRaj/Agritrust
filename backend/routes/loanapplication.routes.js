@@ -2,7 +2,7 @@
 
 const express = require('express')
 
-const authMiddleware = require('../middleware/authMiddleware')
+const authMiddleware = require('../middlewares/authMiddleware')
 
 const { applyForLoan } = require('../controller/loanapplication.controller')
 const { getFarmerLoans } = require('../controller/loanapplication.controller')

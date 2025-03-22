@@ -13,7 +13,7 @@ const farmerRoute = require("./routes/farmer.routes")
 const applyloanRoute = require('./routes/loanapplication.routes')
 const adminRouter = require('./routes/admin.routes');
 const orgRouter = require('./routes/org.routes');
-const {createDefaultAdmin} = require('./controllers/admin.controller');
+const {createDefaultAdmin} = require('./controller/admin.controller');
 
 app.use('/api/farmer', farmerRoute);
 app.use('/api/farmer', applyloanRoute)

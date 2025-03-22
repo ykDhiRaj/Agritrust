@@ -8,6 +8,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminLogin from './pages/admin/AdminLogin';
 import FarmerSignup from './pages/farmer/FarmerSignup';
 import OrganizationSignup from './pages/organization/OrganizationSignup';
+import LoanScoreCalculator from './pages/LoanScoreCalculator';
 
 // Main App Component
 function App() {
@@ -27,6 +28,7 @@ function App() {
               <Route path="/organization-signup" element={<OrganizationSignup />} />
               <Route path="/admin-login" element={<AdminLogin />} />
               <Route path="/admin" element={<AdminDashboard/>} />
+              <Route path="/score" element={<LoanScoreCalculator/>} />
             </Routes>
         </main>
       </div>

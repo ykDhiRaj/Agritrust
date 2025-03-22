@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
+import { toast } from 'react-hot-toast';
+import axios from 'axios';
 
 const FarmerSignup = () => {
   const navigate = useNavigate();
@@ -37,15 +39,20 @@ const FarmerSignup = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
+  
+    try {
+      const response = await axios.post('http://localhost:3000/api/farmer/signup', formState);
+      
+      toast.success(response.data.message || 'Account created successfully!');
       navigate('/farmer/dashboard');
-    }, 1500);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Signup failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
