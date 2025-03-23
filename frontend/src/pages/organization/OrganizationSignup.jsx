@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Sprout, ArrowRight, Loader2, Building2 } from 'lucide-react';
+import { Sprout, ArrowRight, Loader2, Building2, AlertCircle } from 'lucide-react';
+import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,11 +10,13 @@ import { Card } from '@/components/ui/card';
 export default function OrganizationSignup() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const [formState, setFormState] = useState({
-    orgName: '',
+    name: '',
     email: '',
     password: '',
     confirmPassword: '',
+    phone: '',
   });
 
   const handleChange = (e) => {
@@ -21,15 +24,49 @@ export default function OrganizationSignup() {
     setFormState(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setError('');
     
-    // Simulate API call
-    setTimeout(() => {
+    // Validate passwords match
+    if (formState.password !== formState.confirmPassword) {
+      setError('Passwords do not match');
       setIsLoading(false);
+      return;
+    }
+    
+    try {
+      // Prepare data for API
+      const registrationData = {
+        name: formState.name,
+        email: formState.email,
+        password: formState.password,
+        phone: formState.phone
+      };
+      
+      // Send registration request
+      const response = await axios.post('http://localhost:3000/api/org/register-organiation', registrationData,{
+        headers: {
+          Authorization:`Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      // Store the JWT token
+      localStorage.setItem('orgToken', response.data.token);
+      
+      // Set the authorization header for future requests
+      axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+      
+      // Navigate to organization dashboard
       navigate('/organization');
-    }, 1500);
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Registration failed. Please try again.";
+      setError(errorMessage);
+      console.error("Registration error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -89,16 +126,24 @@ export default function OrganizationSignup() {
             
             <h2 className="text-2xl font-semibold text-slate-800 mb-6">Create your organization account</h2>
             
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-md text-sm flex items-start">
+                <AlertCircle className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+            
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="orgName">Organization Name</Label>
+                <Label htmlFor="name">Organization Name</Label>
                 <Input
-                  id="orgName"
-                  name="orgName"
-                  value={formState.orgName}
+                  id="name"
+                  name="name"
+                  value={formState.name}
                   onChange={handleChange}
                   placeholder="Your organization name"
                   required
+                  disabled={isLoading}
                 />
               </div>
               
@@ -112,6 +157,20 @@ export default function OrganizationSignup() {
                   onChange={handleChange}
                   placeholder="org@example.com"
                   required
+                  disabled={isLoading}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  value={formState.phone}
+                  onChange={handleChange}
+                  placeholder="+1 (555) 123-4567"
+                  disabled={isLoading}
                 />
               </div>
               
@@ -125,6 +184,7 @@ export default function OrganizationSignup() {
                   onChange={handleChange}
                   placeholder="••••••••"
                   required
+                  disabled={isLoading}
                 />
               </div>
               
@@ -138,6 +198,7 @@ export default function OrganizationSignup() {
                   onChange={handleChange}
                   placeholder="••••••••"
                   required
+                  disabled={isLoading}
                 />
               </div>
               

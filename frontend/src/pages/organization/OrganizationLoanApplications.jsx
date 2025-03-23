@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useEffect } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { IndianRupee, Calendar, User, MapPin, Calculator, X, Check, Edit, PenSquare } from 'lucide-react';
 import axios from "axios";
 import { 
@@ -74,7 +74,6 @@ const STATE_ADJUSTMENTS = {
   "Bihar": { soil: 75, water: 5, potential: 5 },
   "Assam": { soil: 75, water: 5, potential: 6 }
 };
-import axios from 'axios';
 
 export default function OrganizationLoanApplications() {
 

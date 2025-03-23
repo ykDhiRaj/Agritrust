@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios'; // Make sure axios is imported
 import { 
   Home, Users, CreditCard, FileText, PieChart, Calendar, Settings, 
   ArrowRight, Layers, TrendingUp, User, Bell, Search, LogOut, 
@@ -52,6 +53,8 @@ export default function AdminDashboard() {
     password: '',
     phone: '',
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState({ type: '', message: '' });
 
   // Update time every minute
   useEffect(() => {
@@ -86,8 +89,6 @@ export default function AdminDashboard() {
     { id: 4, farmer: "Ananya Singh", amount: "₹200,000", purpose: "Farm Equipment", status: "Rejected", date: "19 Mar 2025" },
   ];
 
-  // Organization types for dropdown
-
   // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -95,19 +96,70 @@ export default function AdminDashboard() {
       ...prev,
       [name]: value
     }));
+    
+    // Clear any previous status messages when form is modified
+    if (submitStatus.message) {
+      setSubmitStatus({ type: '', message: '' });
+    }
   };
 
-  // Handle form submission
-  const handleSubmit = (e) => {
+  // Handle form submission with Axios
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('New Organization Data:', formData);
-    setIsModalOpen(false);
-    setFormData({ 
-      name: '', 
-      email: '', 
-      password: '', 
-      phone: '',
-    });
+    setIsSubmitting(true);
+    setSubmitStatus({ type: '', message: '' });
+    
+    try {
+      // Make API call to register organization
+      const response = await axios.post('http://localhost:3000/api/org/register-organiation', formData,{
+        headers:{Authorization: `Bearer ${localStorage.getItem('token')}`}
+      });
+      
+      // Update activities list with new organization
+      const newActivity = {
+        id: recentActivities.length + 1,
+        type: "New Organization",
+        name: formData.name,
+        location: "Added by Admin",
+        timestamp: "Just now"
+      };
+      
+      // Add to recent activities
+      recentActivities.unshift(newActivity);
+      
+      // Show success message
+      setSubmitStatus({ 
+        type: 'success', 
+        message: 'Organization registered successfully! They will receive login credentials via email.' 
+      });
+      
+      // Close modal after a delay
+      setTimeout(() => {
+        setIsModalOpen(false);
+        // Reset form
+        setFormData({ 
+          name: '', 
+          email: '', 
+          password: '', 
+          phone: '',
+        });
+        setSubmitStatus({ type: '', message: '' });
+      }, 2000);
+      
+    } catch (error) {
+      // Handle errors
+      console.error('Registration error:', error);
+      let errorMsg = 'Failed to register organization.';
+      
+      // Extract error message from API response if available
+      if (error.response && error.response.data && error.response.data.message) {
+        errorMsg = error.response.data.message;
+      }
+      
+      setSubmitStatus({ type: 'error', message: errorMsg });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const toggleMenu = () => {
@@ -344,6 +396,28 @@ export default function AdminDashboard() {
             <p className="text-emerald-600 mt-1">Complete the form below to register a new organization</p>
           </div>
           
+          {/* Status message display */}
+          {submitStatus.message && (
+            <div className={`mb-4 p-3 rounded-lg ${
+              submitStatus.type === 'success' 
+                ? 'bg-green-100 text-green-800 border border-green-300' 
+                : 'bg-red-100 text-red-800 border border-red-300'
+            }`}>
+              <div className="flex items-start">
+                <div className="mr-2 mt-0.5">
+                  {submitStatus.type === 'success' ? (
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    <AlertTriangle className="h-4 w-4" />
+                  )}
+                </div>
+                <p>{submitStatus.message}</p>
+              </div>
+            </div>
+          )}
+          
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="relative">
               <div className="flex items-center mb-1">
@@ -410,10 +484,7 @@ export default function AdminDashboard() {
                 />
               </div>
             </div>
-            
-            
-    
-            
+                        
             <div className="bg-emerald-50 p-3 rounded-lg mt-6 text-sm text-emerald-700">
               <div className="flex items-start">
                 <div className="mr-2 mt-0.5">
@@ -428,15 +499,27 @@ export default function AdminDashboard() {
                 type="button"
                 variant="outline"
                 onClick={() => setIsModalOpen(false)}
+                disabled={isSubmitting}
                 className="bg-white hover:bg-emerald-50 text-emerald-700 border-emerald-300 transition-colors duration-200"
               >
                 Cancel
               </Button>
               <Button 
                 type="submit"
+                disabled={isSubmitting}
                 className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white transition-all duration-200 transform hover:scale-105"
               >
-                Add Organization
+                {isSubmitting ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Processing...
+                  </>
+                ) : (
+                  <>Add Organization</>
+                )}
               </Button>
             </div>
           </form>
@@ -508,25 +591,71 @@ export default function AdminDashboard() {
                 ))}
               </tbody>
             </table>
-          </div>
+            </div>
           
-          <div className="mt-4 flex items-center justify-between">
-            <p className="text-sm text-emerald-600">Showing 4 of 120 applications</p>
+          <div className="flex justify-between items-center mt-4">
+            <div className="text-sm text-emerald-600">Showing 4 of 56 applications</div>
             <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm" disabled className="border-emerald-200 text-emerald-400">Previous</Button>
-              <Button variant="outline" size="sm" className="bg-emerald-100 border-emerald-300 text-emerald-700">1</Button>
-              <Button variant="outline" size="sm" className="border-emerald-300 text-emerald-700 hover:bg-emerald-50">2</Button>
-              <Button variant="outline" size="sm" className="border-emerald-300 text-emerald-700 hover:bg-emerald-50">3</Button>
-              <Button variant="outline" size="sm" className="border-emerald-300 text-emerald-700 hover:bg-emerald-50">Next</Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                disabled
+              >
+                Previous
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="bg-emerald-600 border-emerald-600 text-white hover:bg-emerald-700"
+              >
+                1
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+              >
+                2
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+              >
+                3
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+              >
+                Next
+              </Button>
             </div>
           </div>
         </Card>
-
+        
         {/* Footer */}
-        <footer className="text-center text-emerald-600 text-sm py-4">
-          © 2025 AgriTrust Admin Dashboard. All rights reserved.
+        <footer className="mt-6 pt-6 border-t border-emerald-200">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center">
+            <div className="text-emerald-600 text-sm">
+              &copy; {new Date().getFullYear()} AgriTrust. All rights reserved.
+            </div>
+            <div className="flex space-x-4 mt-4 md:mt-0">
+              <Button variant="ghost" className="text-xs text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 p-0">
+                Terms of Service
+              </Button>
+              <Button variant="ghost" className="text-xs text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 p-0">
+                Privacy Policy
+              </Button>
+              <Button variant="ghost" className="text-xs text-emerald-600 hover:text-emerald-800 hover:bg-emerald-50 p-0">
+                Help & Support
+              </Button>
+            </div>
+          </div>
         </footer>
       </main>
     </div>
   );
-};
+}

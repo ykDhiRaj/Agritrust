@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { User, ArrowRight, Sprout } from 'lucide-react';
+import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +12,8 @@ export default function AdminLogin() {
     email: '',
     password: '',
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleInputChange = (e) => {
@@ -21,10 +24,30 @@ export default function AdminLogin() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle admin login logic here
-    navigate('/admin');
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      // Replace with your actual API endpoint
+      const response = await axios.post('http://localhost:3000/api/admin/login', formData);
+      
+      // Store the token in localStorage or sessionStorage
+      localStorage.setItem('token', response.data.token);
+      
+      // Set authorization header for future requests
+      axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+      
+      // Navigate to admin dashboard
+      navigate('/admin');
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || "Login failed. Please try again.";
+      setError(errorMessage);
+      console.error("Login error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -43,6 +66,12 @@ export default function AdminLogin() {
 
         {/* Form */}
         <div className="p-6">
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-md text-sm">
+              {error}
+            </div>
+          )}
+          
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Admin Email</Label>
@@ -54,6 +83,7 @@ export default function AdminLogin() {
                 onChange={handleInputChange}
                 required
                 placeholder="admin@agritrust.com"
+                disabled={isLoading}
               />
             </div>
 
@@ -72,15 +102,17 @@ export default function AdminLogin() {
                 onChange={handleInputChange}
                 required
                 placeholder="••••••••"
+                disabled={isLoading}
               />
             </div>
 
             <Button
               type="submit"
               className="w-full bg-green-600 hover:bg-green-700 text-white"
+              disabled={isLoading}
             >
-              Login as Admin
-              <ArrowRight className="w-4 h-4 ml-2" />
+              {isLoading ? "Logging in..." : "Login as Admin"}
+              {!isLoading && <ArrowRight className="w-4 h-4 ml-2" />}
             </Button>
             
             <div className="relative mt-6">
@@ -97,6 +129,7 @@ export default function AdminLogin() {
                 type="button"
                 variant="outline"
                 className="w-full mt-2 border-green-500 text-green-600 hover:bg-green-50"
+                disabled={isLoading}
               >
                 Back to Standard Login
               </Button>
