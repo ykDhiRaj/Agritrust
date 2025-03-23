@@ -13,12 +13,15 @@ const farmerRoute = require("./routes/farmer.routes")
 const applyloanRoute = require('./routes/loanapplication.routes')
 const adminRouter = require('./routes/admin.routes');
 const orgRouter = require('./routes/org.routes');
+const authRoutes = require("./routes/auth.routes");
 const { createDefaultAdmin } = require('./controller/admin.controller');
 
 app.use('/api/farmer', farmerRoute);
 app.use('/api/farmer', applyloanRoute)
 app.use('/api/admin', adminRouter);
 app.use('/api/org', orgRouter);
+
+app.use("/api/auth",authRoutes);
 
 mongoose.connect(process.env.MONGODB_URI).
     then(() => {
@@ -32,5 +35,3 @@ app.listen(PORT, async () => {
     await createDefaultAdmin();
     console.log(`Successfully connected and app is running at port ${PORT}`)
 })
-
-
