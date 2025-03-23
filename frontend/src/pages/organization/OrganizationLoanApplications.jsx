@@ -1,26 +1,26 @@
 import React, { useEffect, useState, useRef } from "react";
 import { IndianRupee, Calendar, User, MapPin, Calculator, X, Check, Edit, PenSquare } from 'lucide-react';
 import axios from "axios";
-import { 
-  Chart as ChartJS, 
-  CategoryScale, 
-  LinearScale, 
-  BarElement, 
-  Title, 
-  Tooltip, 
-  Legend, 
-  ArcElement, 
-  RadialLinearScale, 
-  PointElement, 
-  LineElement 
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  RadialLinearScale,
+  PointElement,
+  LineElement
 } from 'chart.js';
 import { Bar, Doughnut, Radar } from 'react-chartjs-2';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogHeader, 
-  DialogTitle, 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
   DialogFooter
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -30,15 +30,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 // Register Chart.js components
 ChartJS.register(
-  CategoryScale, 
-  LinearScale, 
-  BarElement, 
-  Title, 
-  Tooltip, 
-  Legend, 
-  ArcElement, 
-  RadialLinearScale, 
-  PointElement, 
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+  RadialLinearScale,
+  PointElement,
   LineElement
 );
 
@@ -78,77 +78,33 @@ const STATE_ADJUSTMENTS = {
 export default function OrganizationLoanApplications() {
 
   useEffect(() => {
-      const getAllApplications = async () => {
-        try{
-          const response = await axios.get('http://localhost:3000/api/org/farmer-application',{
-            headers:{Authorization: `Bearer ${localStorage.getItem('token')}`}
-          });
-          console.log(response.data);
-          setApplications(response.data);
+    const getAllApplications = async () => {
+      try {
+        const response = await axios.get('http://localhost:3000/api/org/farmer-application', {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        console.log(response.data);
+        setApplications(response.data);
 
-        } catch (error) {
-          console.log(error);
-        }
+      } catch (error) {
+        console.log(error);
       }
+    }
     getAllApplications();
-   
-   },[])
+
+  }, [])
 
   const [applications, setApplications] = useState([
-    {
-      id: 1,
-      farmerName: "Rajesh Kumar",
-      location: "Ludhiana, Punjab",
-      amount: "₹500,000",
-      purpose: "Crop Cultivation",
-      status: "Pending",
-      dateApplied: "2024-03-15",
-      tenure: "36 months",
-      interestRate: "7.5%",
-      requestedAmount: "₹500,000",
-      requestedTenure: "36 months",
-      requestedInterestRate: "7.5%",
-      counterOffered: false
-    },
-    {
-      id: 2,
-      farmerName: "Amit Patel",
-      location: "Ahmedabad, Gujarat",
-      amount: "₹300,000",
-      purpose: "Equipment Purchase",
-      status: "Approved",
-      dateApplied: "2024-03-10",
-      tenure: "24 months",
-      interestRate: "8.2%",
-      requestedAmount: "₹300,000",
-      requestedTenure: "24 months",
-      requestedInterestRate: "8.2%",
-      counterOffered: false
-    },
-    {
-      id: 3,
-      farmerName: "Priya Singh",
-      location: "Sonipat, Haryana",
-      amount: "₹200,000",
-      purpose: "Seed Purchase",
-      status: "Pending",
-      dateApplied: "2024-03-05",
-      tenure: "12 months",
-      interestRate: "6.9%",
-      requestedAmount: "₹200,000",
-      requestedTenure: "12 months",
-      requestedInterestRate: "6.9%",
-      counterOffered: false
-    }
+
   ]);
-  
+
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [interestDetails, setInterestDetails] = useState(null);
   const [isCounterOfferDialogOpen, setIsCounterOfferDialogOpen] = useState(false);
   const [counterOfferDetails, setCounterOfferDetails] = useState(null);
-  
+
   const openCalculator = (application) => {
     if (application.status === "Pending") {
       setSelectedApplication(application);
@@ -160,7 +116,7 @@ export default function OrganizationLoanApplications() {
     setInterestDetails(application);
     setIsDialogOpen(true);
   };
-  
+
   const showCounterOfferDialog = (application) => {
     setCounterOfferDetails({
       ...application,
@@ -172,32 +128,32 @@ export default function OrganizationLoanApplications() {
   };
 
   const updateApplicationStatus = (id, newStatus) => {
-    setApplications(prevApplications => 
-      prevApplications.map(app => 
+    setApplications(prevApplications =>
+      prevApplications.map(app =>
         app.id === id ? { ...app, status: newStatus } : app
       )
     );
     setIsDialogOpen(false);
   };
-  
+
   const submitCounterOffer = () => {
     const updatedAmount = `₹${parseInt(counterOfferDetails.counterAmount).toLocaleString('en-IN')}`;
     const updatedTenure = `${counterOfferDetails.counterTenure} months`;
     const updatedInterestRate = `${counterOfferDetails.counterInterestRate}%`;
-    
-    setApplications(prevApplications => 
-      prevApplications.map(app => 
-        app.id === counterOfferDetails.id ? { 
-          ...app, 
-          amount: updatedAmount, 
-          tenure: updatedTenure, 
+
+    setApplications(prevApplications =>
+      prevApplications.map(app =>
+        app.id === counterOfferDetails.id ? {
+          ...app,
+          amount: updatedAmount,
+          tenure: updatedTenure,
           interestRate: updatedInterestRate,
           counterOffered: true,
           status: "Counter Offered"
         } : app
       )
     );
-    
+
     setIsCounterOfferDialogOpen(false);
   };
 
@@ -218,26 +174,25 @@ export default function OrganizationLoanApplications() {
               <div>
                 <div className="flex items-center gap-2">
                   <User className="w-5 h-5 text-emerald-600" />
-                  <h3 className="text-xl font-semibold text-slate-800">{application.farmerName}</h3>
+                  <h3 className="text-xl font-semibold text-slate-800">{application.name}</h3>
                 </div>
                 <div className="flex items-center gap-2 mt-1 text-slate-600">
                   <MapPin className="w-4 h-4" />
-                  <span>{application.location}</span>
+                  <span>{application.place}</span>
                 </div>
               </div>
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                application.status === 'Pending'
-                  ? 'bg-yellow-100 text-yellow-700'
-                  : application.status === 'Approved'
+              <span className={`px-3 py-1 rounded-full text-sm font-medium ${application.status === 'Pending'
+                ? 'bg-yellow-100 text-yellow-700'
+                : application.status === 'Approved'
                   ? 'bg-emerald-100 text-emerald-700'
                   : application.status === 'Counter Offered'
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'bg-purple-100 text-purple-700'
-              }`}>
+                    ? 'bg-blue-100 text-blue-700'
+                    : 'bg-purple-100 text-purple-700'
+                }`}>
                 {application.status}
               </span>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4 mt-4">
               <div className="flex items-center gap-2">
                 <IndianRupee className="w-5 h-5 text-emerald-600" />
@@ -255,7 +210,7 @@ export default function OrganizationLoanApplications() {
                 <span className="text-slate-700">Applied: {application.dateApplied}</span>
               </div>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4 mt-4">
               <div className="flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-emerald-600" />
@@ -280,27 +235,27 @@ export default function OrganizationLoanApplications() {
                 </span>
               </div>
             </div>
-            
+
             <div className="flex justify-between items-center mt-4">
               <p className="text-slate-600">Purpose: {application.purpose}</p>
               <div className="flex gap-2">
                 {application.status === "Pending" && (
                   <>
-                    <button 
+                    <button
                       onClick={() => showInterestDialog(application)}
                       className="flex items-center gap-2 px-3 py-2 bg-emerald-50 text-emerald-600 rounded-md hover:bg-emerald-100 transition-colors"
                     >
                       <Check className="w-4 h-4" />
                       <span>Approve</span>
                     </button>
-                    <button 
+                    <button
                       onClick={() => showCounterOfferDialog(application)}
                       className="flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition-colors"
                     >
                       <PenSquare className="w-4 h-4" />
                       <span>Counter Offer</span>
                     </button>
-                    <button 
+                    <button
                       onClick={() => openCalculator(application)}
                       className="flex items-center gap-2 px-3 py-2 bg-purple-50 text-purple-600 rounded-md hover:bg-purple-100 transition-colors"
                     >
@@ -311,14 +266,14 @@ export default function OrganizationLoanApplications() {
                 )}
                 {application.status === "Counter Offered" && (
                   <>
-                    <button 
+                    <button
                       onClick={() => updateApplicationStatus(application.id, "Approved")}
                       className="flex items-center gap-2 px-3 py-2 bg-emerald-50 text-emerald-600 rounded-md hover:bg-emerald-100 transition-colors"
                     >
                       <Check className="w-4 h-4" />
                       <span>Finalize Approval</span>
                     </button>
-                    <button 
+                    <button
                       onClick={() => showCounterOfferDialog(application)}
                       className="flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition-colors"
                     >
@@ -332,16 +287,16 @@ export default function OrganizationLoanApplications() {
           </div>
         ))}
       </div>
-      
+
       {/* Calculator Drawer */}
       <div className={`fixed inset-0 bg-black bg-opacity-30 z-40 transition-opacity ${isDrawerOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-           onClick={() => setIsDrawerOpen(false)}></div>
-      
+        onClick={() => setIsDrawerOpen(false)}></div>
+
       <div className={`fixed right-0 top-0 h-full bg-white z-50 w-full max-w-3xl shadow-xl transform transition-transform duration-300 
                       ${isDrawerOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex justify-between items-center p-4 border-b">
           <h3 className="text-xl font-bold text-slate-800">Agricultural Loan Score Calculator</h3>
-          <button 
+          <button
             onClick={() => setIsDrawerOpen(false)}
             className="p-2 rounded-full hover:bg-gray-100"
           >
@@ -364,7 +319,7 @@ export default function OrganizationLoanApplications() {
               Review the loan application details before approval
             </DialogDescription>
           </DialogHeader>
-          
+
           {interestDetails && (
             <div className="space-y-4 py-4">
               <div className="bg-slate-50 p-4 rounded-lg">
@@ -378,27 +333,27 @@ export default function OrganizationLoanApplications() {
                   <div>{interestDetails.dateApplied}</div>
                 </div>
               </div>
-              
+
               <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-100">
                 <h4 className="font-medium text-emerald-700 mb-2">Loan Terms</h4>
                 <div className="grid grid-cols-2 gap-y-3 text-sm">
                   <div className="text-slate-600">Requested Amount:</div>
                   <div className="font-medium text-lg">{interestDetails.amount}</div>
-                  
+
                   <div className="text-slate-600">Purpose:</div>
                   <div>{interestDetails.purpose}</div>
-                  
+
                   <div className="text-slate-600">Proposed Tenure:</div>
                   <div className="font-medium">{interestDetails.tenure}</div>
-                  
+
                   <div className="text-slate-600">Interest Rate:</div>
                   <div className="font-medium">{interestDetails.interestRate}</div>
-                  
+
                   <div className="text-slate-600 pt-3">Monthly Payment:</div>
                   <div className="font-medium pt-3">
                     {calculateMonthlyPayment(interestDetails.amount, interestDetails.interestRate, interestDetails.tenure)}
                   </div>
-                  
+
                   <div className="text-slate-600">Total Interest:</div>
                   <div className="text-emerald-700">
                     {calculateTotalInterest(interestDetails.amount, interestDetails.interestRate, interestDetails.tenure)}
@@ -407,15 +362,15 @@ export default function OrganizationLoanApplications() {
               </div>
             </div>
           )}
-          
+
           <DialogFooter className="sm:justify-between">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setIsDialogOpen(false)}
             >
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={() => updateApplicationStatus(interestDetails.id, "Approved")}
               className="bg-emerald-600 text-white hover:bg-emerald-700"
             >
@@ -424,7 +379,7 @@ export default function OrganizationLoanApplications() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
+
       {/* Counter Offer Dialog */}
       <Dialog open={isCounterOfferDialogOpen} onOpenChange={setIsCounterOfferDialogOpen}>
         <DialogContent className="sm:max-w-md">
@@ -434,7 +389,7 @@ export default function OrganizationLoanApplications() {
               Adjust the loan terms to make a counter offer to {counterOfferDetails?.farmerName}
             </DialogDescription>
           </DialogHeader>
-          
+
           {counterOfferDetails && (
             <div className="space-y-6 py-4">
               <div className="space-y-4">
@@ -451,7 +406,7 @@ export default function OrganizationLoanApplications() {
                     Originally requested: {counterOfferDetails.requestedAmount}
                   </p>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="counterTenure">Loan Tenure (months)</Label>
                   <Select
@@ -475,7 +430,7 @@ export default function OrganizationLoanApplications() {
                     Originally requested: {counterOfferDetails.requestedTenure}
                   </p>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="counterInterestRate">Interest Rate (%)</Label>
                   <Input
@@ -493,33 +448,33 @@ export default function OrganizationLoanApplications() {
                   </p>
                 </div>
               </div>
-              
+
               <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
                 <h4 className="font-medium text-blue-700 mb-2">Counter Offer Summary</h4>
                 <div className="grid grid-cols-2 gap-y-2 text-sm">
                   <div className="text-slate-600">New Amount:</div>
                   <div className="font-medium">₹{parseInt(counterOfferDetails.counterAmount).toLocaleString('en-IN')}</div>
-                  
+
                   <div className="text-slate-600">New Tenure:</div>
                   <div className="font-medium">{counterOfferDetails.counterTenure} months</div>
-                  
+
                   <div className="text-slate-600">New Interest Rate:</div>
                   <div className="font-medium">{counterOfferDetails.counterInterestRate}%</div>
-                  
+
                   <div className="text-slate-600 pt-3">New Monthly Payment:</div>
                   <div className="font-medium pt-3">
                     {calculateMonthlyPayment(
-                      `₹${parseInt(counterOfferDetails.counterAmount)}`, 
-                      `${counterOfferDetails.counterInterestRate}%`, 
+                      `₹${parseInt(counterOfferDetails.counterAmount)}`,
+                      `${counterOfferDetails.counterInterestRate}%`,
                       `${counterOfferDetails.counterTenure} months`
                     )}
                   </div>
-                  
+
                   <div className="text-slate-600">New Total Interest:</div>
                   <div className="text-blue-700">
                     {calculateTotalInterest(
-                      `₹${parseInt(counterOfferDetails.counterAmount)}`, 
-                      `${counterOfferDetails.counterInterestRate}%`, 
+                      `₹${parseInt(counterOfferDetails.counterAmount)}`,
+                      `${counterOfferDetails.counterInterestRate}%`,
                       `${counterOfferDetails.counterTenure} months`
                     )}
                   </div>
@@ -527,15 +482,15 @@ export default function OrganizationLoanApplications() {
               </div>
             </div>
           )}
-          
+
           <DialogFooter className="sm:justify-between">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setIsCounterOfferDialogOpen(false)}
             >
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={submitCounterOffer}
               className="bg-blue-600 text-white hover:bg-blue-700"
             >
@@ -554,9 +509,9 @@ function calculateMonthlyPayment(amount, interestRate, tenure) {
   const principal = parseFloat(amount.replace(/[₹,]/g, ''));
   const rate = parseFloat(interestRate.replace('%', '')) / 100 / 12; // monthly interest rate
   const numberOfPayments = parseInt(tenure.split(' ')[0]); // extract months
-  
+
   const monthlyPayment = principal * rate * Math.pow(1 + rate, numberOfPayments) / (Math.pow(1 + rate, numberOfPayments) - 1);
-  
+
   return `₹${Math.round(monthlyPayment).toLocaleString('en-IN')} /month`;
 }
 
@@ -565,11 +520,11 @@ function calculateTotalInterest(amount, interestRate, tenure) {
   const principal = parseFloat(amount.replace(/[₹,]/g, ''));
   const rate = parseFloat(interestRate.replace('%', '')) / 100 / 12;
   const numberOfPayments = parseInt(tenure.split(' ')[0]);
-  
+
   const monthlyPayment = principal * rate * Math.pow(1 + rate, numberOfPayments) / (Math.pow(1 + rate, numberOfPayments) - 1);
   const totalAmount = monthlyPayment * numberOfPayments;
   const totalInterest = totalAmount - principal;
-  
+
   return `₹${Math.round(totalInterest).toLocaleString('en-IN')}`;
 }
 
@@ -586,17 +541,17 @@ const LoanScoreCalculator = ({ location }) => {
     if (soilType in SOIL_RATINGS) return SOIL_RATINGS[soilType];
     return STATE_ADJUSTMENTS[state]?.soil || 50;
   };
-  
+
   const evaluateClimateStability = (temperature, precipitation) => {
     let tempScore = 0;
-    
+
     if (temperature >= 20 && temperature <= 30) tempScore = 50;
     else if (temperature > 30 && temperature <= 35) tempScore = 40;
     else if (temperature > 35) tempScore = 25;
     else if (temperature >= 15 && temperature < 20) tempScore = 45;
     else if (temperature >= 10 && temperature < 15) tempScore = 30;
     else tempScore = 20;
-    
+
     let precipScore = 0;
     if (precipitation <= 5) precipScore = 10;
     else if (precipitation <= 20) precipScore = 20;
@@ -604,20 +559,20 @@ const LoanScoreCalculator = ({ location }) => {
     else if (precipitation <= 100) precipScore = 45;
     else if (precipitation <= 200) precipScore = 40;
     else precipScore = 30;
-    
+
     return Math.min(100, tempScore + precipScore);
   };
-  
+
   const evaluateWaterAvailability = (precipitation, state) => {
     let baseScore = 0;
-    
+
     if (precipitation >= 100) baseScore = 90;
     else if (precipitation >= 50) baseScore = 80;
     else if (precipitation >= 30) baseScore = 70;
     else if (precipitation >= 20) baseScore = 60;
     else if (precipitation >= 10) baseScore = 40;
     else baseScore = 20;
-    
+
     const adjustment = STATE_ADJUSTMENTS[state]?.water || 0;
     return Math.max(0, Math.min(100, baseScore + adjustment));
   };
@@ -627,16 +582,16 @@ const LoanScoreCalculator = ({ location }) => {
     const climateStability = evaluateClimateStability(weatherData.temperature, weatherData.precipitation);
     const waterAvailability = evaluateWaterAvailability(weatherData.precipitation, state);
     const regionalBonus = STATE_ADJUSTMENTS[state]?.potential || 0;
-    
+
     // Calculate base score with weights
     const baseScore = Math.round(
       0.4 * soilFertility + 0.3 * climateStability + 0.3 * waterAvailability
     );
-    
+
     // Apply regional adjustment
     return Math.max(0, Math.min(100, baseScore + regionalBonus));
   };
-  
+
   // Fetch location, soil type, and weather data
   const fetchLoanScore = async () => {
     setLoading(true);
@@ -646,22 +601,22 @@ const LoanScoreCalculator = ({ location }) => {
     try {
       // Set place from input
       setPlace(locationInput);
-      
+
       // Get Latitude & Longitude
       const locationRes = await axios.get(
         `https://us1.locationiq.com/v1/search.php?key=${LOCATIONIQ_API_KEY}&q=${locationInput}, India&format=json`
       );
-      
+
       const lat = parseFloat(locationRes.data[0].lat);
       const lon = parseFloat(locationRes.data[0].lon);
-      
+
       // Get detailed address info including state
       const reverseGeoRes = await axios.get(
         `https://us1.locationiq.com/v1/reverse.php?key=${LOCATIONIQ_API_KEY}&lat=${lat}&lon=${lon}&format=json`
       );
-      
+
       const state = reverseGeoRes.data.address.state || "";
-      
+
       // Get Soil Data
       const soilRes = await axios.get(`https://api.openepi.io/soil/type?lat=${lat}&lon=${lon}`);
       const soilType = soilRes.data.properties.most_probable_soil_type;
@@ -670,7 +625,7 @@ const LoanScoreCalculator = ({ location }) => {
       const weatherRes = await axios.get(
         `https://api.weatherbit.io/v2.0/current?lat=${lat}&lon=${lon}&key=${WEATHERBIT_API_KEY}`
       );
-      
+
       const temp = parseFloat(weatherRes.data.data[0].temp);
       const precip = parseFloat(weatherRes.data.data[0].precip);
 
@@ -679,7 +634,7 @@ const LoanScoreCalculator = ({ location }) => {
       const climateStability = evaluateClimateStability(temp, precip);
       const waterAvailability = evaluateWaterAvailability(precip, state);
       const creditScore = calculateCreditScore(soilType, { temperature: temp, precipitation: precip }, state);
-      
+
       // Set data
       setData({
         place: locationInput,
@@ -691,7 +646,7 @@ const LoanScoreCalculator = ({ location }) => {
         precipitation: precip,
         creditScore,
         soilFertility,
-        climateStability,waterAvailability,
+        climateStability, waterAvailability,
         recommendations: {
           ideal: creditScore >= 80 ? "Highly recommended for loans" : (creditScore >= 60 ? "Recommended with standard terms" : "Consider with caution"),
           crops: getCropRecommendations(state, soilType, temp, precip),
@@ -728,7 +683,7 @@ const LoanScoreCalculator = ({ location }) => {
       "Andhra Pradesh": ["Rice", "Cotton", "Tobacco", "Chillies"],
       "Telangana": ["Cotton", "Rice", "Maize", "Turmeric"]
     };
-    
+
     // Soil-based crop recommendations
     const soilBasedCrops = {
       "Alluvial Soil": ["Rice", "Wheat", "Sugarcane", "Vegetables"],
@@ -751,15 +706,15 @@ const LoanScoreCalculator = ({ location }) => {
       "Aridisols": ["Drought-resistant crops", "Dates", "Millets", "Cotton"],
       "Histosols": ["Vegetables", "Rice", "Blueberries", "Cranberries"]
     };
-    
+
     // Temperature and precipitation based filtering
     let recommendedCrops = [];
-    
+
     // Get base recommendations from state and soil
     if (state in stateBasedCrops) {
       recommendedCrops = [...stateBasedCrops[state]];
     }
-    
+
     if (soilType in soilBasedCrops) {
       // Add soil-based crops not already in the list
       soilBasedCrops[soilType].forEach(crop => {
@@ -768,7 +723,7 @@ const LoanScoreCalculator = ({ location }) => {
         }
       });
     }
-    
+
     // Filter based on temperature and precipitation
     // For simplicity, we'll just return the top 5 crops
     return recommendedCrops.slice(0, 5);
@@ -783,7 +738,7 @@ const LoanScoreCalculator = ({ location }) => {
     if (score >= 40) return "9.0% - 10.0%";
     return "10.0% - 12.0%";
   };
-  
+
   const getRecommendedLoanAmount = (score) => {
     if (score >= 90) return "₹500,000 - ₹2,000,000";
     if (score >= 80) return "₹400,000 - ₹1,500,000";
@@ -793,7 +748,7 @@ const LoanScoreCalculator = ({ location }) => {
     if (score >= 40) return "₹100,000 - ₹300,000";
     return "₹50,000 - ₹200,000";
   };
-  
+
   const getRecommendedTenure = (score) => {
     if (score >= 80) return "12 - 60 months";
     if (score >= 60) return "12 - 48 months";
@@ -818,7 +773,7 @@ const LoanScoreCalculator = ({ location }) => {
       }
     ]
   };
-  
+
   // Chart options
   const radarOptions = {
     scales: {
@@ -837,7 +792,7 @@ const LoanScoreCalculator = ({ location }) => {
       }
     }
   };
-  
+
   // Loan approval probability chart
   const doughnutData = {
     labels: ['Approval Probability', 'Risk Factor'],
@@ -878,7 +833,7 @@ const LoanScoreCalculator = ({ location }) => {
     <div className="space-y-6">
       <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-100">
         <h3 className="text-xl font-semibold text-slate-800 mb-4">Agricultural Loan Score Calculator</h3>
-        
+
         <div className="flex gap-2 mb-6">
           <Input
             type="text"
@@ -887,7 +842,7 @@ const LoanScoreCalculator = ({ location }) => {
             onChange={(e) => setLocationInput(e.target.value)}
             className="flex-1"
           />
-          <Button 
+          <Button
             onClick={fetchLoanScore}
             className="bg-emerald-600 text-white hover:bg-emerald-700"
             disabled={loading}
@@ -895,13 +850,13 @@ const LoanScoreCalculator = ({ location }) => {
             {loading ? "Loading..." : "Calculate"}
           </Button>
         </div>
-        
+
         {error && (
           <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4">
             {error}
           </div>
         )}
-        
+
         {data && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -910,21 +865,21 @@ const LoanScoreCalculator = ({ location }) => {
                 <div className="grid grid-cols-2 gap-y-2 text-sm">
                   <div className="text-slate-600">Place:</div>
                   <div>{data.place}</div>
-                  
+
                   <div className="text-slate-600">State:</div>
                   <div>{data.state}</div>
-                  
+
                   <div className="text-slate-600">Soil Type:</div>
                   <div>{data.soilType}</div>
-                  
+
                   <div className="text-slate-600">Current Temperature:</div>
                   <div>{data.temperature}°C</div>
-                  
+
                   <div className="text-slate-600">Precipitation:</div>
                   <div>{data.precipitation} mm</div>
                 </div>
               </div>
-              
+
               <div className="text-center flex flex-col items-center justify-center">
                 <div className="w-40 h-40 relative">
                   <Doughnut data={doughnutData} options={doughnutOptions} />
@@ -948,7 +903,7 @@ const LoanScoreCalculator = ({ location }) => {
                 </div>
               </div>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <h4 className="font-medium text-slate-700 mb-3">Agricultural Potential Analysis</h4>
@@ -956,7 +911,7 @@ const LoanScoreCalculator = ({ location }) => {
                   <Radar data={radarData} options={radarOptions} />
                 </div>
               </div>
-              
+
               <div className="bg-emerald-50 p-4 rounded-lg">
                 <h4 className="font-medium text-emerald-700 mb-3">Recommendations</h4>
                 <div className="space-y-3 text-sm">
@@ -964,22 +919,22 @@ const LoanScoreCalculator = ({ location }) => {
                     <div className="text-slate-700 font-medium">Loan Decision:</div>
                     <div className="mt-1">{data.recommendations.ideal}</div>
                   </div>
-                  
+
                   <div>
                     <div className="text-slate-700 font-medium">Recommended Interest Rate:</div>
                     <div className="mt-1">{data.recommendations.interestRate}</div>
                   </div>
-                  
+
                   <div>
                     <div className="text-slate-700 font-medium">Suggested Loan Amount:</div>
                     <div className="mt-1">{data.recommendations.loanAmount}</div>
                   </div>
-                  
+
                   <div>
                     <div className="text-slate-700 font-medium">Suggested Tenure:</div>
                     <div className="mt-1">{data.recommendations.tenure}</div>
                   </div>
-                  
+
                   <div>
                     <div className="text-slate-700 font-medium">Recommended Crops:</div>
                     <div className="mt-1 flex flex-wrap gap-1">
@@ -993,7 +948,7 @@ const LoanScoreCalculator = ({ location }) => {
                 </div>
               </div>
             </div>
-            
+
             <div className="mt-6">
               <h4 className="font-medium text-slate-700 mb-3">Detailed Score Breakdown</h4>
               <div className="space-y-3">
@@ -1006,7 +961,7 @@ const LoanScoreCalculator = ({ location }) => {
                     <div className="bg-emerald-500 h-2 rounded-full" style={{ width: `${data.soilFertility}%` }}></div>
                   </div>
                 </div>
-                
+
                 <div>
                   <div className="flex justify-between mb-1">
                     <span className="text-sm font-medium text-slate-700">Climate Stability</span>
@@ -1016,7 +971,7 @@ const LoanScoreCalculator = ({ location }) => {
                     <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${data.climateStability}%` }}></div>
                   </div>
                 </div>
-                
+
                 <div>
                   <div className="flex justify-between mb-1">
                     <span className="text-sm font-medium text-slate-700">Water Availability</span>
@@ -1026,19 +981,18 @@ const LoanScoreCalculator = ({ location }) => {
                     <div className="bg-cyan-500 h-2 rounded-full" style={{ width: `${data.waterAvailability}%` }}></div>
                   </div>
                 </div>
-                
+
                 <div>
                   <div className="flex justify-between mb-1">
                     <span className="text-sm font-medium text-slate-700">Overall Credit Score</span>
                     <span className="text-sm text-slate-600">{data.creditScore}%</span>
                   </div>
                   <div className="w-full bg-slate-200 rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full ${
-                        data.creditScore >= 80 ? 'bg-emerald-500' : 
-                        data.creditScore >= 60 ? 'bg-blue-500' : 
-                        data.creditScore >= 40 ? 'bg-amber-500' : 'bg-red-500'
-                      }`} 
+                    <div
+                      className={`h-2 rounded-full ${data.creditScore >= 80 ? 'bg-emerald-500' :
+                        data.creditScore >= 60 ? 'bg-blue-500' :
+                          data.creditScore >= 40 ? 'bg-amber-500' : 'bg-red-500'
+                        }`}
                       style={{ width: `${data.creditScore}%` }}
                     ></div>
                   </div>
