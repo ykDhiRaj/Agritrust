@@ -1,8 +1,9 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Organization = require("../models/org.model");
+const LoanApplication = require("../models/loanapplication.model");
 
-
+// registering an organization
 async function registerOrganization(req, res) {
     try {
         const { name, email, password, phone } = req.body;
@@ -66,4 +67,13 @@ async function loginOrganization(req, res) {
     }
 }
 
-module.exports = { registerOrganization, loginOrganization };
+async function getLoanApplications(req, res) {
+    try {
+        const loanApplications = await LoanApplication.find();
+        res.status(200).json(loanApplications);
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error });
+    }
+}
+
+module.exports = { registerOrganization, loginOrganization, getLoanApplications};
