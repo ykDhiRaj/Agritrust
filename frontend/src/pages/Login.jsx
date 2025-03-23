@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { User, Building2, ArrowRight, Sprout } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,42 +14,45 @@ export default function Login() {
     email: '',
     password: '',
   });
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic here
-    
-    // Route based on userType
-    if (userType === 'farmer') {
-      navigate('/farmer');
-    } else if (userType === 'organization') {
-      navigate('/organization');
+    setIsLoading(true);
+
+    try {
+      const endpoint = userType === 'farmer' ? 'http://localhost:3000/api/farmer/login' : 'http://localhost:3000/api/org/login-organization';
+      const response = await axios.post(endpoint, formData);
+      
+      // Store token in localStorage
+      localStorage.setItem('token', response.data.token);
+      toast.success('Login successful');
+
+      // Redirect based on user type
+      if (userType === 'farmer') {
+        navigate('/farmer/dashboard');
+      } else {
+        navigate('/organization/dashboard');
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // The login button text and functionality changes based on userType
-  const getLoginButtonText = () => {
-    return `Login as ${userType === 'farmer' ? 'Farmer' : 'Organization'}`;
-  };
-
-  // Get signup path based on user type
-  const getSignupPath = () => {
-    return userType === 'farmer' ? '/farmer-signup' : '/organization-signup';
-  };
+  const getLoginButtonText = () => `Login as ${userType === 'farmer' ? 'Farmer' : 'Organization'}`;
+  const getSignupPath = () => (userType === 'farmer' ? '/farmer-signup' : '/organization-signup');
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md border-slate-200 shadow-sm overflow-hidden">
-        {/* Header */}
         <div className="bg-green-600 p-6 text-white">
           <div className="flex items-center justify-center mb-2">
             <div className="bg-white/20 rounded-full p-2">
@@ -58,7 +63,6 @@ export default function Login() {
           <p className="text-green-100 text-center mt-1">Connecting farmers with financial support</p>
         </div>
 
-        {/* User Type Selection */}
         <div className="p-6">
           <div className="mb-6">
             <Label className="block text-sm font-medium text-slate-700 mb-2">I am a:</Label>
@@ -66,9 +70,7 @@ export default function Login() {
               <button
                 type="button"
                 className={`flex items-center justify-center p-4 rounded-lg border-2 transition-all ${
-                  userType === 'farmer'
-                    ? 'border-green-600 bg-green-50 text-green-700'
-                    : 'border-slate-200 text-slate-600 hover:border-green-300'
+                  userType === 'farmer' ? 'border-green-600 bg-green-50 text-green-700' : 'border-slate-200 text-slate-600 hover:border-green-300'
                 }`}
                 onClick={() => setUserType('farmer')}
               >
@@ -78,9 +80,7 @@ export default function Login() {
               <button
                 type="button"
                 className={`flex items-center justify-center p-4 rounded-lg border-2 transition-all ${
-                  userType === 'organization'
-                    ? 'border-green-600 bg-green-50 text-green-700'
-                    : 'border-slate-200 text-slate-600 hover:border-green-300'
+                  userType === 'organization' ? 'border-green-600 bg-green-50 text-green-700' : 'border-slate-200 text-slate-600 hover:border-green-300'
                 }`}
                 onClick={() => setUserType('organization')}
               >
@@ -90,47 +90,25 @@ export default function Login() {
             </div>
           </div>
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                required
-                placeholder="your@email.com"
-              />
+              <Input type="email" id="email" name="email" value={formData.email} onChange={handleInputChange} required placeholder="your@email.com" />
             </div>
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="password">Password</Label>
-                <a href="#" className="text-sm text-green-600 hover:text-green-700">
-                  Forgot password?
-                </a>
+                <a href="#" className="text-sm text-green-600 hover:text-green-700">Forgot password?</a>
               </div>
-              <Input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                required
-                placeholder="••••••••"
-              />
+              <Input type="password" id="password" name="password" value={formData.password} onChange={handleInputChange} required placeholder="••••••••" />
             </div>
 
-            <Button
-              type="submit"
-              className="w-full bg-green-600 hover:bg-green-700 text-white"
-            >
-              {getLoginButtonText()}
+            <Button type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white" disabled={isLoading}>
+              {isLoading ? 'Logging in...' : getLoginButtonText()}
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
-            
+
             <div className="relative mt-6">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-slate-200"></div>
@@ -139,23 +117,15 @@ export default function Login() {
                 <span className="px-2 bg-white text-slate-500">New to AgriTrust?</span>
               </div>
             </div>
-            
+
             <Link to={getSignupPath()}>
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full mt-2 border-green-500 text-green-600 hover:bg-green-50"
-              >
+              <Button type="button" variant="outline" className="w-full mt-2 border-green-500 text-green-600 hover:bg-green-50">
                 Create {userType === 'farmer' ? 'Farmer' : 'Organization'} Account
               </Button>
             </Link>
 
             <Link to="/admin-login">
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full mt-2 border-blue-500 text-blue-600 hover:bg-blue-50"
-              >
+              <Button type="button" variant="outline" className="w-full mt-2 border-blue-500 text-blue-600 hover:bg-blue-50">
                 Login as Admin
               </Button>
             </Link>
