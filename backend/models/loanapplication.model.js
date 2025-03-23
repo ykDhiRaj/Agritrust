@@ -17,6 +17,10 @@ const loanApplicationSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    purpose: {
+        type: String,
+        required: true
+    },
     amount: {
         type: Number,
         required: true,

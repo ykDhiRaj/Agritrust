@@ -50,28 +50,8 @@ const expressInterest = async (req, res) => {
 };
 
 
-const getInterestedLoans = async (req, res) => {
-    try {
-        // Middleware should attach the authenticated farmer's ID to req.farmer
-        const farmeremail = req.farmer.email;
-        const farmer = farmer_model.find({ email: farmeremail })
-        // Find all bank interests related to this farmer
-        const interestedLoans = await BankInterested.find({ farmerId: farmer._id })
-            .populate("loanApplicationId") // Populate Loan Application Details
-            .populate("orgId", "name email") // Populate Bank/Organization Details (Only Name & Email)
 
-        if (!interestedLoans.length) {
-            return res.status(404).json({ message: "No interested loans found for this farmer" });
-        }
 
-        return res.status(200).json(interestedLoans);
-    } catch (error) {
-        console.error("Error fetching interested loans:", error);
-        return res.status(500).json({ message: "Internal Server Error" });
-    }
-};
-
-module.exports = { getInterestedLoans };
 
 
 

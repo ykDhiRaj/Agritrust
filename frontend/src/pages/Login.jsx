@@ -5,6 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
+import { toast } from 'react-hot-toast'
+import useFarmerstore from '../lib/user.zustand';
+import axios from 'axios';
 
 export default function Login() {
   const [userType, setUserType] = useState('farmer');
@@ -32,40 +35,44 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsLoading(false);
-    
-    // Route based on userType
-    if (userType === 'farmer') {
-      navigate('/farmer');
-    } else if (userType === 'organization') {
-      navigate('/organization');
+
+    try {
+      const endpoint = userType === 'farmer' ? 'http://localhost:3000/api/farmer/login' : 'http://localhost:3000/api/org/login-organization';
+      const response = await axios.post(endpoint, formData);
+      console.log(response.data);
+      useFarmerstore.getState().addfarmer(response.data)
+
+
+      // Store token in localStorage
+      localStorage.setItem('token', response.data.token);
+      toast.success('Login successful');
+
+      // Redirect based on user type
+      if (userType === 'farmer') {
+        navigate('/farmer/dashboard');
+      } else {
+        navigate('/organization/dashboard');
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Login failed. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // The login button text and functionality changes based on userType
-  const getLoginButtonText = () => {
-    return `Login as ${userType === 'farmer' ? 'Farmer' : 'Organization'}`;
-  };
-
-  // Get signup path based on user type
-  const getSignupPath = () => {
-    return userType === 'farmer' ? '/farmer-signup' : '/organization-signup';
-  };
+  const getLoginButtonText = () => `Login as ${userType === 'farmer' ? 'Farmer' : 'Organization'}`;
+  const getSignupPath = () => (userType === 'farmer' ? '/farmer-signup' : '/organization-signup');
 
   return (
     <div className="h-screen w-full bg-gradient-to-b from-green-50 to-blue-50 flex items-center justify-center">
-      <Card 
-        className={`w-full max-w-md h-auto max-h-screen overflow-auto border-slate-200 shadow-lg transition-all duration-700 transform ${
-          appear ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
-        }`}
+      <Card
+        className={`w-full max-w-md h-auto max-h-screen overflow-auto border-slate-200 shadow-lg transition-all duration-700 transform ${appear ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
+          }`}
       >
         {/* Header */}
         <div className="bg-gradient-to-r from-green-600 to-green-500 p-4 text-white relative overflow-hidden">
           <div className="flex items-center justify-center mb-2 relative">
-            <div className="bg-white/20 rounded-full p-2 shadow-inner animate-bounce" style={{animationDuration: '3s'}}>
+            <div className="bg-white/20 rounded-full p-2 shadow-inner animate-bounce" style={{ animationDuration: '3s' }}>
               <Sprout className="h-6 w-6 text-white" />
             </div>
           </div>
@@ -80,11 +87,10 @@ export default function Login() {
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
-                className={`flex items-center justify-center p-3 rounded-lg border-2 transition-all duration-300 transform hover:scale-105 ${
-                  userType === 'farmer'
-                    ? 'border-green-600 bg-green-50 text-green-700 shadow-md'
-                    : 'border-slate-200 text-slate-600 hover:border-green-300'
-                }`}
+                className={`flex items-center justify-center p-3 rounded-lg border-2 transition-all duration-300 transform hover:scale-105 ${userType === 'farmer'
+                  ? 'border-green-600 bg-green-50 text-green-700 shadow-md'
+                  : 'border-slate-200 text-slate-600 hover:border-green-300'
+                  }`}
                 onClick={() => setUserType('farmer')}
               >
                 <User className={`w-4 h-4 mr-2 transition-transform duration-500 ${userType === 'farmer' ? 'animate-pulse' : ''}`} />
@@ -92,11 +98,10 @@ export default function Login() {
               </button>
               <button
                 type="button"
-                className={`flex items-center justify-center p-3 rounded-lg border-2 transition-all duration-300 transform hover:scale-105 ${
-                  userType === 'organization'
-                    ? 'border-green-600 bg-green-50 text-green-700 shadow-md'
-                    : 'border-slate-200 text-slate-600 hover:border-green-300'
-                }`}
+                className={`flex items-center justify-center p-3 rounded-lg border-2 transition-all duration-300 transform hover:scale-105 ${userType === 'organization'
+                  ? 'border-green-600 bg-green-50 text-green-700 shadow-md'
+                  : 'border-slate-200 text-slate-600 hover:border-green-300'
+                  }`}
                 onClick={() => setUserType('organization')}
               >
                 <Building2 className={`w-4 h-4 mr-2 transition-transform duration-500 ${userType === 'organization' ? 'animate-pulse' : ''}`} />
@@ -157,7 +162,7 @@ export default function Login() {
                 </>
               )}
             </Button>
-            
+
             <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-slate-200"></div>
@@ -166,7 +171,7 @@ export default function Login() {
                 <span className="px-2 bg-white text-slate-500">New to AgriTrust?</span>
               </div>
             </div>
-            
+
             <Link to={getSignupPath()}>
               <Button
                 type="button"
@@ -188,7 +193,7 @@ export default function Login() {
             </Link>
           </form>
         </div>
-        
+
         {/* Footer */}
         <div className="p-2 bg-slate-50 border-t border-slate-200 text-center text-xs text-slate-500">
           <p>© {new Date().getFullYear()} AgriTrust - Growing communities together</p>

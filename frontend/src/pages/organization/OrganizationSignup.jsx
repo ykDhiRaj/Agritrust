@@ -28,14 +28,14 @@ export default function OrganizationSignup() {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-    
+
     // Validate passwords match
     if (formState.password !== formState.confirmPassword) {
       setError('Passwords do not match');
       setIsLoading(false);
       return;
     }
-    
+
     try {
       // Prepare data for API
       const registrationData = {
@@ -44,20 +44,20 @@ export default function OrganizationSignup() {
         password: formState.password,
         phone: formState.phone
       };
-      
+
       // Send registration request
-      const response = await axios.post('http://localhost:3000/api/org/register-organiation', registrationData,{
+      const response = await axios.post('http://localhost:3000/api/org/register-organiation', registrationData, {
         headers: {
-          Authorization:`Bearer ${localStorage.getItem('token')}`
+          Authorization: `Bearer ${localStorage.getItem('token')}`
         }
       });
-      
+
       // Store the JWT token
       localStorage.setItem('orgToken', response.data.token);
-      
+
       // Set the authorization header for future requests
       axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
-      
+
       // Navigate to organization dashboard
       navigate('/organization');
     } catch (error) {
@@ -80,7 +80,7 @@ export default function OrganizationSignup() {
             </div>
             <h1 className="text-3xl font-bold text-slate-800 mb-4">Welcome to AgriTrust</h1>
             <p className="text-slate-600 mb-8">The trusted platform connecting organizations with agricultural opportunities.</p>
-            
+
             <div className="space-y-6 text-left">
               <div className="flex items-start">
                 <div className="flex-shrink-0 bg-green-100 rounded-full p-2">
@@ -91,7 +91,7 @@ export default function OrganizationSignup() {
                   <p className="text-sm text-slate-500">Offer loans and credit to farmers</p>
                 </div>
               </div>
-              
+
               <div className="flex items-start">
                 <div className="flex-shrink-0 bg-green-100 rounded-full p-2">
                   <span className="text-green-600">02</span>
@@ -101,7 +101,7 @@ export default function OrganizationSignup() {
                   <p className="text-sm text-slate-500">Access verified farming information</p>
                 </div>
               </div>
-              
+
               <div className="flex items-start">
                 <div className="flex-shrink-0 bg-green-100 rounded-full p-2">
                   <span className="text-green-600">03</span>
@@ -114,7 +114,7 @@ export default function OrganizationSignup() {
             </div>
           </div>
         </div>
-        
+
         {/* Right panel - Signup form */}
         <div className="w-full md:w-1/2 p-4 sm:p-6 md:p-8 flex items-center justify-center">
           <Card className="w-full max-w-md p-6 border-slate-200 shadow-sm">
@@ -123,16 +123,16 @@ export default function OrganizationSignup() {
                 <Building2 className="h-8 w-8 text-green-600" />
               </div>
             </div>
-            
+
             <h2 className="text-2xl font-semibold text-slate-800 mb-6">Create your organization account</h2>
-            
+
             {error && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-md text-sm flex items-start">
                 <AlertCircle className="h-4 w-4 mr-2 mt-0.5 flex-shrink-0" />
                 <span>{error}</span>
               </div>
             )}
-            
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Organization Name</Label>
@@ -146,7 +146,7 @@ export default function OrganizationSignup() {
                   disabled={isLoading}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -160,7 +160,7 @@ export default function OrganizationSignup() {
                   disabled={isLoading}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone Number</Label>
                 <Input
@@ -173,7 +173,7 @@ export default function OrganizationSignup() {
                   disabled={isLoading}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <Input
@@ -187,7 +187,7 @@ export default function OrganizationSignup() {
                   disabled={isLoading}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm Password</Label>
                 <Input
@@ -201,9 +201,9 @@ export default function OrganizationSignup() {
                   disabled={isLoading}
                 />
               </div>
-              
-              <Button 
-                type="submit" 
+
+              <Button
+                type="submit"
                 className="w-full bg-green-600 hover:bg-green-700 text-white"
                 disabled={isLoading}
               >
@@ -220,7 +220,7 @@ export default function OrganizationSignup() {
                 )}
               </Button>
             </form>
-            
+
             <div className="mt-6 text-center text-sm text-slate-500">
               Already have an account?{' '}
               <Link to="/login" className="text-green-600 hover:text-green-700 font-medium">

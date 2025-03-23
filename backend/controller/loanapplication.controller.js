@@ -4,7 +4,7 @@ const farmer_model = require('../models/farmer.model')
 // ✅ Create a Loan Application
 const applyForLoan = async (req, res) => {
     try {
-        const { amount, tenure, interestRate, place } = req.body;
+        const { loanAmount, loanTerm, interestRate, location, purpose } = req.body;
         const user = req.user; // Middleware assigns `req.user` (Farmer details)
         console.log(user);
 
@@ -14,7 +14,7 @@ const applyForLoan = async (req, res) => {
         }
 
         // ✅ Check required fields
-        if (!amount || !tenure || !interestRate || !place) {
+        if (!loanAmount || !loanTerm || !interestRate || !location) {
             return res.status(400).json({ message: "All fields are required" });
         }
 
@@ -31,10 +31,11 @@ const applyForLoan = async (req, res) => {
             farmerId: getuser._id,
             name: getuser.name,
             email: getuser.email,
-            place,
-            amount,
-            tenure,
+            place: location,
+            amount: loanAmount,
+            tenure: loanTerm,
             interestRate,
+            purpose,
             status: "Pending",
         });
 

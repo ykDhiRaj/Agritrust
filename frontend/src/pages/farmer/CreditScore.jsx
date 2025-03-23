@@ -1,8 +1,22 @@
 import React from 'react';
 import { format } from 'date-fns';
 
+import useFarmerstore from '../../lib/user.zustand';
+// import { useSearchParams } from 'react-router-dom';
+
 export default function CreditScore() {
-  const creditScore = 685;
+  const farmer = useFarmerstore((state) => state.farmer)
+  let creditScore = 0
+  if (!farmer.loginfarmer.creditScore == null) {
+    creditScore = farmer.loginfarmer.creditScore
+  }
+  console.log(creditScore)
+
+  // const creditScore = farmer.loginfarmer.creditScore ? 0 : farmer.loginfarmer.creditScore;
+
+  console.log(farmer.loginfarmer.creditScore
+    , "farmer");
+
 
   return (
     <div className="space-y-6">
@@ -11,7 +25,7 @@ export default function CreditScore() {
         <div className="text-6xl font-bold text-emerald-600 mb-4">{creditScore}</div>
         <div className="flex items-center gap-2 mb-4">
           <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
-            <div 
+            <div
               className="h-full bg-emerald-600 rounded-full transition-all duration-500"
               style={{ width: `${Math.min(100, (creditScore / 850) * 100)}%` }}
             />
@@ -33,7 +47,7 @@ export default function CreditScore() {
                 <span className="text-emerald-600 font-medium">Excellent</span>
               </div>
               <div className="h-2 bg-slate-200 rounded-full">
-                <div className="h-full w-[95%] bg-emerald-600 rounded-full" />
+                <div className={`h-full w-[${creditScore}%] bg-emerald-600 rounded-full`} />
               </div>
             </div>
             <div>
@@ -51,7 +65,7 @@ export default function CreditScore() {
                 <span className="text-emerald-600 font-medium">Very Good</span>
               </div>
               <div className="h-2 bg-slate-200 rounded-full">
-                <div className="h-full w-[85%] bg-emerald-600 rounded-full" />
+                <div className="h-full w-[30%] bg-emerald-600 rounded-full" />
               </div>
             </div>
           </div>

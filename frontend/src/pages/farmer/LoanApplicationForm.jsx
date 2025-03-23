@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 export default function LoanApplicationForm() {
   const navigate = useNavigate();
@@ -37,7 +38,7 @@ export default function LoanApplicationForm() {
     { value: '11.25', label: '11.25% - Land development' },
   ];
 
-  // Predefined loan purposes as per official agricultural loan guidelines
+  // Predefined s as per official agricultural loan guidelines
   const loanPurposes = [
     { value: 'crop_production', label: 'Crop Production' },
     { value: 'farm_equipment', label: 'Farm Equipment & Machinery' },
@@ -74,16 +75,26 @@ export default function LoanApplicationForm() {
     setIsSubmitting(true);
 
     try {
-      // Here you would typically make an API call to submit the form data
-      // For example: await api.post('/loan-applications', formData);
+      console.log(formData);
 
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const token = localStorage.getItem("token"); // Assuming you store JWT in local storage
+      const response = await axios.post(
+        "http://localhost:3000/api/farmer/applyloan",
+        formData,
+        {
+          headers: {
 
-      // Navigate to loan applications page after successful submission
-      navigate('/farmer/loan-applications');
+            Authorization: `Bearer ${token}`, // Sending token for authentication
+          },
+        }
+      );
+
+      console.log("Loan Application Submitted:", response.data);
+      alert("Loan application submitted successfully!");
+      navigate("/farmer/loan-applications");
     } catch (error) {
-      console.error('Failed to submit loan application:', error);
+      console.error("Error applying for loan:", error.response?.data || error.message);
+      alert("Failed to submit loan application.");
     } finally {
       setIsSubmitting(false);
     }
