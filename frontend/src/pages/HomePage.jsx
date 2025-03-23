@@ -554,7 +554,7 @@ const HomePage = () => {
           
           {/* Footer Bottom */}
           <div className="border-t border-slate-700 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-slate-400">© 2023 AgriTrust. All rights reserved.</p>
+            <p className="text-slate-400">© 2025 AgriTrust. All rights reserved.</p>
             <div className="mt-4 md:mt-0 flex space-x-6">
               <a href="#" className="text-slate-400 hover:text-green-400 transition-colors duration-300">Privacy Policy</a>
               <a href="#" className="text-slate-400 hover:text-green-400 transition-colors duration-300">Terms of Service</a>
